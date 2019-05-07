@@ -1,0 +1,111 @@
+.eslintcache
+.DS_Store
+build/
+build_scripts/scripts/
+.vscode
+.tsconfig.json
+tsconfig.json
+*.sublime-project
+*.sublime-workspace
+.cache/
+guilded_user_profile.sh
+npm-debug.log
+yarn-error.log
+node_modules
+.cache-loader
+.happypack
+.codemod.bookmark
+dump.rdb
+*.pem
+*.code-workspace
+*jsconfig.json
+analyze.json
+analyze_query.sql
+lastQuery.sql
+test-results.xml
+client/www/coverage
+server/media
+client/www/.nyc_output
+shared/game_consts/SortedBuildGameList.js
+sitemap*.xml
+ffmpeg-*.log
+
+
+# Native App
+# OSX
+#
+.DS_Store
+Pods/
+
+# Xcode
+#
+
+build/
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+*.xccheckout
+*.moved-aside
+DerivedData
+*.hmap
+*.ipa
+*.xcuserstate
+project.xcworkspace
+
+# Android/IntelliJ
+#
+build/
+.idea
+.gradle
+local.properties
+*.iml
+
+# node.js
+#
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# BUCK
+buck-out/
+\.buckd/
+*.keystore
+
+# fastlane
+#
+# It is recommended to not store the screenshots in the git repo. Instead, use fastlane to re-generate the
+# screenshots whenever they are needed.
+# For more information about the recommended setup visit:
+# https://docs.fastlane.tools/best-practices/source-control/
+
+*/fastlane/report.xml
+*/fastlane/Preview.html
+*/fastlane/screenshots
+
+# Bundle artifact
+*.jsbundle
+*.map
+*.ios.map
+*.bundle
+*.apk
+
+# Haul
+#
+haul-debug.log
+pods/
+releaseStaging/
+index.*.hot-update.js
+*.hot-update.json
+
+StockReactionCategories.js
+StockReactions.js
+StockReactionIcons.jsx
+
+# MacOSX dot files
+._*
