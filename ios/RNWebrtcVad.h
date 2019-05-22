@@ -5,7 +5,17 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
-@interface RNWebrtcVad : NSObject <RCTBridgeModule>
+#import <Foundation/Foundation.h>
 
+@protocol RNWebrtcVadDelegate <NSObject>
+- (void) processSampleData:(NSData *) data;
 @end
-  
+
+@interface RNWebrtcVad : NSObject <RCTBridgeModule>
+  @property (nonatomic, weak) id<RNWebrtcVadDelegate> delegate;
+
+  + (OSStatus) CheckError;
+  - (OSStatus) _prepareWithSampleRate:(double)desiredSampleRate;
+  - (OSStatus) _start;
+  - (OSStatus) _stop;
+@end
