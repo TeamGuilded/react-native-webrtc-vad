@@ -4,9 +4,12 @@ import Promise from 'bluebird';
 
 const { RNWebrtcVad } = NativeModules;
 
-
 export default class index {
-  static testMethod(options){
-    RNWebrtcVad.testMethod(options)
+  static start(options){
+    RNWebrtcVad.start(options);
+  }
+
+  static stop(){
+    RNWebrtcVad.start(options);
   }
 }
