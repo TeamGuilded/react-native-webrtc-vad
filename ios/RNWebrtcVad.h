@@ -7,15 +7,9 @@
 
 #import <Foundation/Foundation.h>
 
-@protocol RNWebrtcVadDelegate <NSObject>
-- (void) processSampleData:(NSData *) data;
-@end
+#include "../webrtcvad/VoiceActivityDetector.h"
+#import "AudioInputController.h";
 
-@interface RNWebrtcVad : NSObject <RCTBridgeModule>
-  @property (nonatomic, weak) id<RNWebrtcVadDelegate> delegate;
-
-  + (OSStatus) CheckError;
-  - (OSStatus) _prepareWithSampleRate:(double)desiredSampleRate;
-  - (OSStatus) _start;
-  - (OSStatus) _stop;
+@interface RNWebrtcVad : NSObject <RCTBridgeModule, AudioInputControllerDelegate>
+  @property (nonatomic, strong) NSMutableData *audioData;
 @end
