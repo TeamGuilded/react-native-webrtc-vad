@@ -15,7 +15,12 @@ RCT_EXPORT_METHOD(start:(NSDictionary *)options) {
     NSLog(@"[WebRTCVad] starting = %@", options);
 
     AudioInputController *inputController = [AudioInputController sharedInstance];
+
+    // If not specified, will match HW sample, which could be too high.
+    // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
+    // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/chevonc/mobileVad/webrtc/common_audio/vad/include/webrtc_vad.h#L75
     [inputController prepareWithSampleRate:32000];
+
     [inputController start];
     voiceDetector = [[VoiceActivityDetector alloc] init];
 }
