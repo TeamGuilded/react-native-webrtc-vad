@@ -18,7 +18,7 @@ RCT_EXPORT_METHOD(start:(NSDictionary *)options) {
 
     // If not specified, will match HW sample, which could be too high.
     // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
-    // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/chevonc/mobileVad/webrtc/common_audio/vad/include/webrtc_vad.h#L75
+    // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
     [inputController prepareWithSampleRate:32000];
 
     [inputController start];
@@ -59,7 +59,7 @@ RCT_EXPORT_METHOD(stop) {
   double sampleRate = [AudioInputController sharedInstance].audioSampleRate;
 
   // Google recommends sending samples (in 10ms, 20, or 30ms) chunk.
-  // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/chevonc/mobileVad/webrtc/common_audio/vad/include/webrtc_vad.h#L75
+  // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
 
   int chunk_size = 0.02 /* seconds/chunk */ * sampleRate * 2 /* bytes/sample */ ; /* bytes/chunk */
 
