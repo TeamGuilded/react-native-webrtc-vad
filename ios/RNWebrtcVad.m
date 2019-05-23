@@ -63,7 +63,7 @@ RCT_EXPORT_METHOD(stop) {
 
   int chunk_size = 0.02 /* seconds/chunk */ * sampleRate * 2 /* bytes/sample */ ; /* bytes/chunk */
 
-  if ([self.audioData length] > chunk_size) {
+  if ([self.audioData length] >= chunk_size) {
   #ifdef DEBUG
     NSLog(@"SENDING = %u", [self.audioData length]);
   #endif
