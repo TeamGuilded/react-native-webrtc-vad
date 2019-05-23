@@ -6,7 +6,7 @@
 #endif
 
 #import <Foundation/Foundation.h>
-#import "AudioInputController.h";
+#import "AudioInputController.h"
 
 @interface RNWebrtcVad : NSObject <RCTBridgeModule, AudioInputControllerDelegate>
   @property (nonatomic, strong) NSMutableData *audioData;

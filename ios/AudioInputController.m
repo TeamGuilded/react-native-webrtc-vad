@@ -13,9 +13,7 @@
 }
 
 - (void)dealloc {
-#ifdef DEBUG
     NSLog(@"[AudioInputController][dealloc]");
-#endif
     AudioComponentInstanceDispose(remoteIOUnit);
 }
 
@@ -27,7 +25,7 @@
         instance = [[self alloc] init];
     });
 
-  return instance;
+    return instance;
 }
 
 - (OSStatus) start {
@@ -39,39 +37,33 @@
 }
 
 - (OSStatus) prepareWithSampleRate:(double)desiredSampleRate {
-
-
-    //   // Checks for valid combinations of |rate| and |frame_length|. We support 10,
-    // // 20 and 30 ms frames and the rates 8000, 16000 and 32000 Hz.
-    // //
-    // // - rate         [i] : Sampling frequency (Hz).
-    // // - frame_length [i] : Speech frame buffer length in number of samples.
-    // //
-    // // returns            : 0 - (valid combination), -1 - (invalid combination)
-    // int WebRtcVad_ValidRateAndFrameLength(int rate, int frame_length);
-
-    OSStatus status = noErr;
     NSLog(@"[WebRTCVad] sampleRate = %f", desiredSampleRate);
 
     AVAudioSession *session = [AVAudioSession sharedInstance];
-
-    // check category setting before overriding here
-    [session setCategory:AVAudioSessionCategoryRecord error:nil];
-
     double sampleRate = session.sampleRate;
-    NSLog(@"hardware sample rate = \(sampleRate), using specified rate = \(desiredSampleRate)");
 
-    if(desiredSampleRate){
+    NSLog(@"hardware sample rate = %f, using specified rate = %f", sampleRate, desiredSampleRate);
+
+    if (desiredSampleRate){
         sampleRate = desiredSampleRate;
     }
 
+    // Store audio sample rate for later use
     self.audioSampleRate = sampleRate;
 
     NSError *error;
     BOOL ok = [session setCategory:AVAudioSessionCategoryPlayAndRecord error:&error];
+
     NSLog(@"set category %d", ok);
 
-    [session setPreferredIOBufferDuration:10 error:&error];
+    // 5 second audio buffer hint
+    [session setPreferredIOBufferDuration:5 error:&error];
+
+    return [self _initializeAudioGraph];
+}
+
+- (OSStatus) _initializeAudioGraph {
+    OSStatus status = noErr;
 
     if (!isInitialized) {
         isInitialized = YES;
@@ -85,30 +77,17 @@
 
         // Get the RemoteIO unit
         AudioComponent remoteIOComponent = AudioComponentFindNext(NULL,&audioComponentDescription);
-        status = AudioComponentInstanceNew(remoteIOComponent,&(self->remoteIOUnit));
+        status = AudioComponentInstanceNew(remoteIOComponent, &(self->remoteIOUnit));
         if (_checkError(status, "Couldn't get RemoteIO unit instance")) {
             return status;
         }
     }
 
+    double sampleRate = self.audioSampleRate;
 
     UInt32 enabledFlag = 1;
     AudioUnitElement bus0 = 0;
     AudioUnitElement bus1 = 1;
-
-    if (YES) {
-        // Configure the RemoteIO unit for playback
-        status = AudioUnitSetProperty (self->remoteIOUnit,
-                                       kAudioOutputUnitProperty_EnableIO,
-                                       kAudioUnitScope_Output,
-                                       bus0,
-                                       &enabledFlag,
-                                       sizeof(enabledFlag));
-        if (_checkError(status, "Couldn't enable RemoteIO output")) {
-            return status;
-        }
-    }
-
 
     // Configure the RemoteIO unit for input
     status = AudioUnitSetProperty(self->remoteIOUnit,
@@ -179,11 +158,11 @@
 
 
 static OSStatus _recordingCallback(void *inRefCon,
-                                  AudioUnitRenderActionFlags *ioActionFlags,
-                                  const AudioTimeStamp *inTimeStamp,
-                                  UInt32 inBusNumber,
-                                  UInt32 inNumberFrames,
-                                  AudioBufferList *ioData) {
+                                   AudioUnitRenderActionFlags *ioActionFlags,
+                                   const AudioTimeStamp *inTimeStamp,
+                                   UInt32 inBusNumber,
+                                   UInt32 inNumberFrames,
+                                   AudioBufferList *ioData) {
     OSStatus status;
 
     AudioInputController *audioInputController = (__bridge AudioInputController *) inRefCon;
@@ -219,23 +198,12 @@ static OSStatus _recordingCallback(void *inRefCon,
 
 static OSStatus _checkError(OSStatus error, const char *operation)
 {
-    // use resolver to throw errors
+    // TODO: Use resolver to throw errors
     if (error == noErr) {
         return error;
     }
-    char errorString[20];
-    // See if it appears to be a 4-char-code
-    *(UInt32 *)(errorString + 1) = CFSwapInt32HostToBig(error);
-    if (isprint(errorString[1]) && isprint(errorString[2]) &&
-        isprint(errorString[3]) && isprint(errorString[4])) {
-        errorString[0] = errorString[5] = '\'';
-        errorString[6] = '\0';
-    } else {
-        // No, format it as an integer
-        //        NSLog(errorString, "%d", (int)error);
-    }
-    // revisit loggin
-    NSLog(@"Error: %s (%s)\n", operation, errorString);
+
+    NSLog(@"Error: %d (%s)\n", operation);
     return error;
 }
 

@@ -13,6 +13,7 @@
   + (OSStatus) _checkError;
   + (OSStatus) _recordingCallback;
 
+  - (OSStatus) _initializeAudioGraph;
   - (OSStatus) prepareWithSampleRate:(double)desiredSampleRate;
   - (OSStatus) start;
   - (OSStatus) stop;
