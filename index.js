@@ -10,6 +10,6 @@ export default class index {
   }
 
   static stop(){
-    RNWebrtcVad.start(options);
+    RNWebrtcVad.stop();
   }
 }

@@ -38,7 +38,7 @@
 
     int voice = WebRtcVad_Process(vad,fs,audio_frame,frame_length);
     // WebRtcVad_Free(vad);
-    NSLog("Voice detection res: %d", voice);
+    NSLog(@"Voice detection res: %d", voice);
     return voice;
 }
 @end

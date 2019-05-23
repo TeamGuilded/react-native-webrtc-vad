@@ -5,7 +5,6 @@
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
 
-#include "../webrtcvad/WVVad.h"
 #import "AudioInputController.h"
 
 @implementation AudioInputController {

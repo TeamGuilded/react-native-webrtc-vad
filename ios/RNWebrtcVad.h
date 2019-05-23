@@ -6,8 +6,6 @@
 #endif
 
 #import <Foundation/Foundation.h>
-
-#include "../webrtcvad/VoiceActivityDetector.h"
 #import "AudioInputController.h";
 
 @interface RNWebrtcVad : NSObject <RCTBridgeModule, AudioInputControllerDelegate>

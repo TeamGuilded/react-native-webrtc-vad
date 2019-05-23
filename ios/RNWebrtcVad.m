@@ -1,6 +1,6 @@
 
 
-#include "../webrtcvad/VoiceActivityDetector.h"
+#include "VoiceActivityDetector.h"
 
 #import "RNWebrtcVad.h"
 #import "AudioInputController.h"
@@ -23,7 +23,7 @@ RCT_EXPORT_METHOD(stop) {
     NSLog(@"[WebRTCVad] stopping");
     [[AudioInputController sharedInstance] stop];
     voiceDetector = nil;
-//    self.audioData = nil;
+    self.audioData = nil;
 }
 
 RCT_EXPORT_METHOD(testMethod:(NSDictionary *)options) {
