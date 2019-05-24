@@ -6,10 +6,10 @@
 }
 
 - (instancetype)init {
-
+    
     self = [super init];
     if(self) {
-
+        
         WebRtcVad_Create(&vad);
         WebRtcVad_Init(vad);
         WebRtcVad_set_mode(vad, 0);

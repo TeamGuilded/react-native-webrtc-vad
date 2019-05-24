@@ -6,15 +6,15 @@
 @end
 
 @interface AudioInputController : NSObject
-  @property (nonatomic, weak) id<AudioInputControllerDelegate> delegate;
-  @property double audioSampleRate;
+@property (nonatomic, weak) id<AudioInputControllerDelegate> delegate;
+@property double audioSampleRate;
 
-  + (instancetype) sharedInstance;
-  + (OSStatus) _checkError;
-  + (OSStatus) _recordingCallback;
++ (instancetype) sharedInstance;
++ (OSStatus) _checkError;
++ (OSStatus) _recordingCallback;
 
-  - (OSStatus) _initializeAudioGraph;
-  - (OSStatus) prepareWithSampleRate:(double)desiredSampleRate;
-  - (OSStatus) start;
-  - (OSStatus) stop;
+- (OSStatus) _initializeAudioGraph;
+- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate;
+- (OSStatus) start;
+- (OSStatus) stop;
 @end

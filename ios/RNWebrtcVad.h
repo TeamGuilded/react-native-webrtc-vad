@@ -9,5 +9,5 @@
 #import "AudioInputController.h"
 
 @interface RNWebrtcVad : NSObject <RCTBridgeModule, AudioInputControllerDelegate>
-  @property (nonatomic, strong) NSMutableData *audioData;
+@property (nonatomic, strong) NSMutableData *audioData;
 @end
