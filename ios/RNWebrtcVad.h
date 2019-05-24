@@ -5,7 +5,9 @@
 #import <React/RCTBridgeModule.h>
 #endif
 
-@interface RNWebrtcVad : NSObject <RCTBridgeModule>
+#import <Foundation/Foundation.h>
+#import "AudioInputController.h"
 
+@interface RNWebrtcVad : NSObject <RCTBridgeModule, AudioInputControllerDelegate>
+  @property (nonatomic, strong) NSMutableData *audioData;
 @end
-  
