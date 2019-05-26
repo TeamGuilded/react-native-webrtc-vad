@@ -12,7 +12,8 @@
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(start:(NSDictionary *)options) {
+RCT_EXPORT_METHOD(start:(NSDictionary *)options)
+{
     NSLog(@"[WebRTCVad] starting = %@", options);
     AudioInputController *inputController = [AudioInputController sharedInstance];
     
@@ -116,4 +117,3 @@ RCT_EXPORT_METHOD(stop) {
 }
 
 @end
-
