@@ -1,19 +1,20 @@
 
 
-#include "VoiceActivityDetector.h"
-
 #import "RNWebrtcVad.h"
-#import "AudioInputController.h"
+
+#include "VoiceActivityDetector.h"
 
 @implementation RNWebrtcVad {
     VoiceActivityDetector *voiceDetector;
+    double cumulativeProcessedSampleLength;
+    BOOL hasListeners;
 }
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(start:(NSDictionary *)options) {
+RCT_EXPORT_METHOD(start:(NSDictionary *)options)
+{
     NSLog(@"[WebRTCVad] starting = %@", options);
-    
     AudioInputController *inputController = [AudioInputController sharedInstance];
     
     // If not specified, will match HW sample, which could be too high.
@@ -33,27 +34,31 @@ RCT_EXPORT_METHOD(stop) {
     self.audioData = nil;
 }
 
-- (dispatch_queue_t)methodQueue
+- (dispatch_queue_t) methodQueue
 {
     return dispatch_get_main_queue();
 }
 
--(instancetype)init {
+-(instancetype) init {
     if (self = [super init]) {
         [AudioInputController sharedInstance].delegate = self;
-        self.audioData = [[NSMutableData alloc] init];
+        cumulativeProcessedSampleLength = 0;
     }
     
     return self;
 }
 
-- (void)dealloc {
+- (void) dealloc {
     voiceDetector = nil;
     self.audioData = nil;
 }
 
 - (void) processSampleData:(NSData *)data
 {
+    if (self.audioData == nil){
+        self.audioData = [[NSMutableData alloc] init];
+    }
+    
     [self.audioData appendData:data];
     
     double sampleRate = [AudioInputController sharedInstance].audioSampleRate;
@@ -61,25 +66,54 @@ RCT_EXPORT_METHOD(stop) {
     // Google recommends sending samples (in 10ms, 20, or 30ms) chunk.
     // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
     
-    int chunk_size = 0.02 /* seconds/chunk */ * sampleRate * 2 /* bytes/sample */ ; /* bytes/chunk */
+    const double sampleLength = 0.02;
     
-    if ([self.audioData length] >= chunk_size) {
+    cumulativeProcessedSampleLength += sampleLength;
+    int chunkSize = sampleLength /* seconds/chunk */ * sampleRate * 2 /* bytes/sample */ ; /* bytes/chunk */
+    
+    if ([self.audioData length] >= chunkSize) {
 #ifdef DEBUG
         NSLog(@"SENDING = %u", [self.audioData length]);
 #endif
         
         const int16_t* audioSample = (const int16_t*) [self.audioData bytes];
         
-        int isVoice = [voiceDetector isVoice:audioSample sample_rate:sampleRate length:chunk_size/2];
+        int isVoice = [voiceDetector isVoice:audioSample sample_rate:sampleRate length:chunkSize/2];
         
 #ifdef DEBUG
         NSLog(@"Detected Voice %d", isVoice);
 #endif
         
-        // Clear buffer
+        // Clear audio buffer
         [self.audioData setLength:0];
+        
+        // Sends updates ~140ms apart back to listeners
+        const double eventInterval = 0.140;
+        if (cumulativeProcessedSampleLength >= eventInterval) {
+            cumulativeProcessedSampleLength = 0;
+            
+            if (hasListeners) {
+                [self sendEventWithName:@"RNWebrtcVad_SpeakingUpdate" body:@{ @"isVoice": @(isVoice) }];
+            }
+        }
     }
 }
 
-@end
+- (NSArray<NSString *> *) supportedEvents
+{
+    return @[@"RNWebrtcVad_SpeakingUpdate"];
+}
 
+// Will be called when this module's first listener is added.
+- (void) startObserving
+{
+    hasListeners = YES;
+}
+
+// Will be called when this module's last listener is removed, or on dealloc.
+- (void) stopObserving
+{
+    hasListeners = NO;
+}
+
+@end

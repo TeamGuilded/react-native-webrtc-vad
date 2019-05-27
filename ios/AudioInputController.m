@@ -203,7 +203,7 @@ static OSStatus _checkError(OSStatus error, const char *operation)
         return error;
     }
     
-    NSLog(@"Error: %d (%s)\n", operation);
+    NSLog(@"Error: (%s)\n", operation);
     return error;
 }
 
