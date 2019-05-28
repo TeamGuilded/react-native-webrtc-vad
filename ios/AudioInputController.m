@@ -232,12 +232,12 @@ static OSStatus _checkError(OSStatus error, const char *operation)
 - (void)restoreOriginalAudioSetup
 {
     @try {
-        const AVAudioSession* audioSession =    [AVAudioSession sharedInstance];
-        BOOL ok = [audioSession setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+        const AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+        BOOL ok = [audioSession setCategory:origAudioCategory error:nil];
 
         NSLog(@"[WebRTCVad] restore category %d", ok);
 
-        [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
+        [audioSession setMode:origAudioMode error:nil];
 
         NSLog(@"[WebRTCVad] restore mode %d", ok);
     } @catch (NSException *e) {
