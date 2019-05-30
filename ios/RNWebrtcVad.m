@@ -16,27 +16,27 @@ RCT_EXPORT_METHOD(start:(NSDictionary *)options)
 {
     NSLog(@"[WebRTCVad] starting = %@", options);
     AudioInputController *inputController = [AudioInputController sharedInstance];
-    
+
     // If not specified, will match HW sample, which could be too high.
     // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
     // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
     [inputController prepareWithSampleRate:32000];
-    
+
     [inputController start];
     voiceDetector = [[VoiceActivityDetector alloc] init];
 }
 
 RCT_EXPORT_METHOD(stop) {
     NSLog(@"[WebRTCVad] stopping");
-    
+
     [[AudioInputController sharedInstance] stop];
     voiceDetector = nil;
     self.audioData = nil;
 }
 
-- (dispatch_queue_t) methodQueue
++ (BOOL)requiresMainQueueSetup
 {
-    return dispatch_get_main_queue();
+  return NO;
 }
 
 -(instancetype) init {
@@ -44,7 +44,7 @@ RCT_EXPORT_METHOD(stop) {
         [AudioInputController sharedInstance].delegate = self;
         cumulativeProcessedSampleLength = 0;
     }
-    
+
     return self;
 }
 
@@ -58,40 +58,40 @@ RCT_EXPORT_METHOD(stop) {
     if (self.audioData == nil){
         self.audioData = [[NSMutableData alloc] init];
     }
-    
+
     [self.audioData appendData:data];
-    
+
     double sampleRate = [AudioInputController sharedInstance].audioSampleRate;
-    
+
     // Google recommends sending samples (in 10ms, 20, or 30ms) chunk.
     // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
-    
+
     const double sampleLength = 0.02;
-    
+
     cumulativeProcessedSampleLength += sampleLength;
     int chunkSize = sampleLength /* seconds/chunk */ * sampleRate * 2 /* bytes/sample */ ; /* bytes/chunk */
-    
+
     if ([self.audioData length] >= chunkSize) {
 #ifdef DEBUG
         NSLog(@"SENDING = %u", [self.audioData length]);
 #endif
-        
+
         const int16_t* audioSample = (const int16_t*) [self.audioData bytes];
-        
+
         int isVoice = [voiceDetector isVoice:audioSample sample_rate:sampleRate length:chunkSize/2];
-        
+
 #ifdef DEBUG
         NSLog(@"Detected Voice %d", isVoice);
 #endif
-        
+
         // Clear audio buffer
         [self.audioData setLength:0];
-        
+
         // Sends updates ~140ms apart back to listeners
         const double eventInterval = 0.140;
         if (cumulativeProcessedSampleLength >= eventInterval) {
             cumulativeProcessedSampleLength = 0;
-            
+
             if (hasListeners) {
                 [self sendEventWithName:@"RNWebrtcVad_SpeakingUpdate" body:@{ @"isVoice": @(isVoice) }];
             }

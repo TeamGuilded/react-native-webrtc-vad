@@ -10,8 +10,6 @@
 @property double audioSampleRate;
 
 + (instancetype) sharedInstance;
-+ (OSStatus) _checkError;
-+ (OSStatus) _recordingCallback;
 
 - (OSStatus) _initializeAudioGraph;
 - (OSStatus) prepareWithSampleRate:(double)desiredSampleRate;
