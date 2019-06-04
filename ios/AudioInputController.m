@@ -62,7 +62,7 @@
 
         NSLog(@"[WebRTCVad] set category %d", ok);
 
-        [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
+        ok = [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
 
         NSLog(@"[WebRTCVad] set mode %d", ok);
 
@@ -186,7 +186,7 @@
 
         NSLog(@"[WebRTCVad] restore category %d", ok);
 
-        [audioSession setMode:origAudioMode error:nil];
+       ok = [audioSession setMode:origAudioMode error:nil];
 
         NSLog(@"[WebRTCVad] restore mode %d", ok);
     } @catch (NSException *e) {
