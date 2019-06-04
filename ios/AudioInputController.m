@@ -62,7 +62,7 @@
 
         NSLog(@"[WebRTCVad] set category %d", ok);
 
-        [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
+        ok = [audioSession setMode:AVAudioSessionModeVoiceChat error:nil];
 
         NSLog(@"[WebRTCVad] set mode %d", ok);
 
@@ -171,6 +171,28 @@
     return status;
 }
 
+- (void)storeOriginalAudioSetup
+{
+    origAudioCategory = [AVAudioSession sharedInstance].category;
+    origAudioMode =  [AVAudioSession sharedInstance].mode;
+    NSLog(@"[WebRTCVad].storeOriginalAudioSetup(): origAudioCategory=%@, origAudioMode=%@", origAudioCategory, origAudioMode);
+}
+
+- (void)restoreOriginalAudioSetup
+{
+    @try {
+        const AVAudioSession* audioSession = [AVAudioSession sharedInstance];
+        BOOL ok = [audioSession setCategory:origAudioCategory error:nil];
+
+        NSLog(@"[WebRTCVad] restore category %d", ok);
+
+       ok = [audioSession setMode:origAudioMode error:nil];
+
+        NSLog(@"[WebRTCVad] restore mode %d", ok);
+    } @catch (NSException *e) {
+        NSLog(@"[WebRTCVad]: session setup failed: %@", e.reason);
+    }
+}
 
 static OSStatus _recordingCallback(void *inRefCon,
                                    AudioUnitRenderActionFlags *ioActionFlags,
@@ -204,7 +226,7 @@ static OSStatus _recordingCallback(void *inRefCon,
 
     NSData *data = [[NSData alloc] initWithBytes:bufferList->mBuffers[0].mData
                                           length:bufferList->mBuffers[0].mDataByteSize];
-    dispatch_async(dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [audioInputController.delegate processSampleData:data];
     });
 
@@ -220,29 +242,6 @@ static OSStatus _checkError(OSStatus error, const char *operation)
 
     NSLog(@"[WebRTCVad] Error: (%s)\n", operation);
     return error;
-}
-
-- (void)storeOriginalAudioSetup
-{
-    origAudioCategory = [AVAudioSession sharedInstance].category;
-    origAudioMode =  [AVAudioSession sharedInstance].mode;
-    NSLog(@"[WebRTCVad].storeOriginalAudioSetup(): origAudioCategory=%@, origAudioMode=%@", origAudioCategory, origAudioMode);
-}
-
-- (void)restoreOriginalAudioSetup
-{
-    @try {
-        const AVAudioSession* audioSession = [AVAudioSession sharedInstance];
-        BOOL ok = [audioSession setCategory:origAudioCategory error:nil];
-
-        NSLog(@"[WebRTCVad] restore category %d", ok);
-
-        [audioSession setMode:origAudioMode error:nil];
-
-        NSLog(@"[WebRTCVad] restore mode %d", ok);
-    } @catch (NSException *e) {
-        NSLog(@"[WebRTCVad]: session setup failed: %@", e.reason);
-    }
 }
 
 @end
