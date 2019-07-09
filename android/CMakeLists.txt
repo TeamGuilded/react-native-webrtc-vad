@@ -10,36 +10,43 @@ cmake_minimum_required(VERSION 3.4.1)
 # and CMake builds them for you. When you build your app, Gradle
 # automatically packages shared libraries with your APK.
 
+
+file(GLOB webrtc_vad_sources
+        "../webrtc/*.c"
+        "../webrtc/common_audio/*/*.c"
+        )
+
 add_library( # Specifies the name of the library.
-             voice-activity-detector
+        voice-activity-detector
 
-             # Sets the library as a shared library.
-             SHARED
+        # Sets the library as a shared library.
+        SHARED
 
-             # Provides a relative path to your source file(s).
-             src/main/cpp/VoiceActivityDetector.extern.cpp )
+        # Provides a relative path to your source file(s).
+        src/main/cpp/VoiceActivityDetector.cpp
+        src/main/cpp/VoiceActivityDetector.extern.cpp
+        )
 
+add_library( # Specifies the name of the library.
+        webrtc-vad
 
-# Searches for a specified prebuilt library and stores the path as a
-# variable. Because CMake includes system libraries in the search path by
-# default, you only need to specify the name of the public NDK library
-# you want to add. CMake verifies that the library exists before
-# completing its build.
+        # Sets the library as a shared library.
+        SHARED
 
-find_library( # Sets the name of the path variable.
-              log-lib
+        # Provides a relative path to your source file(s).
+        ${webrtc_vad_sources}
+        )
 
-              # Specifies the name of the NDK library that
-              # you want CMake to locate.
-              log )
+include_directories(../)
+include_directories(../webrtc/common_audio/vad/include/)
+include_directories(../webrtc/common_audio/signal_processing/include/)
+
 
 # Specifies libraries CMake should link to your target library. You
 # can link multiple libraries, such as libraries you define in this
 # build script, prebuilt third-party libraries, or system libraries.
 
 target_link_libraries( # Specifies the target library.
-                       native-lib
+        voice-activity-detector
+        webrtc-vad)
 
-                       # Links the target library to the log library
-                       # included in the NDK.
-                       ${log-lib} )

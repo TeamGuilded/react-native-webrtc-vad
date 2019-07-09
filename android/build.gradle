@@ -15,6 +15,14 @@ android {
     compileSdkVersion 23
     buildToolsVersion "23.0.1"
 
+    externalNativeBuild {
+        cmake {
+            version "3.10.2"
+            path file('CMakeLists.txt')
+
+        }
+    }
+
     defaultConfig {
         minSdkVersion 16
         targetSdkVersion 22
@@ -33,4 +41,3 @@ repositories {
 dependencies {
     compile 'com.facebook.react:react-native:+'
 }
-  
