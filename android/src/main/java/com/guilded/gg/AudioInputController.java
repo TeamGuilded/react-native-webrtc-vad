@@ -1,19 +1,22 @@
 
 package com.guilded.gg;
 
+import android.arch.core.BuildConfig;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaRecorder;
+import android.util.Log;
+
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class AudioInputController {
     public interface AudioInputControllerListener {
-        void onProcessSampleData(ByteBuffer buffer);
+        void onProcessSampleData(short[] buffer);
     }
 
-    public static final int AudioChannelConfig =  AudioFormat.CHANNEL_IN_MONO;
-    public static final int AudioSampleFormat =  AudioFormat.ENCODING_PCM_16BIT;
+    public static final int AudioChannelConfig = AudioFormat.CHANNEL_IN_MONO;
+    public static final int AudioSampleFormat = AudioFormat.ENCODING_PCM_16BIT;
 
 
     private AudioInputControllerListener listener;
@@ -22,7 +25,7 @@ public class AudioInputController {
     private Thread recordingThread = null;
     private final AtomicBoolean recordingInProgress = new AtomicBoolean(false);
 
-    private int audioSampleRate;
+    private int sampleRate;
     private int bufferSize;
 
     private AudioInputController() {
@@ -36,18 +39,18 @@ public class AudioInputController {
         return AudioInputControllerSingleton.sharedInstance;
     }
 
-    public double sampleRate() {
-        return this.audioSampleRate;
+    public int sampleRate() {
+        return this.sampleRate;
     }
 
     public void start() {
-        recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, this.audioSampleRate,
+        recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, this.sampleRate,
                 AudioInputController.AudioChannelConfig, AudioInputController.AudioSampleFormat, this.bufferSize);
 
         recorder.startRecording();
         recordingInProgress.set(true);
 
-        recordingThread = new Thread(new RecordingRunnable(this.bufferSize, this.listener), "Voice detector thread");
+        recordingThread = new Thread(new RecordingRunnable(this), "Voice detector thread");
         recordingThread.start();
 
     }
@@ -74,39 +77,38 @@ public class AudioInputController {
             sampleRate = desiredSampleRate;
         }
 
-        this.audioSampleRate = sampleRate;
+        this.sampleRate = sampleRate;
 
 
-        this.bufferSize = AudioRecord.getMinBufferSize(this.audioSampleRate,
-                AudioChannelConfig, AudioSampleFormat);
+        // Divide by two since we're using a short array and this method returns the number of bytes
+        int bytesInShort = 2;
+        this.bufferSize = AudioRecord.getMinBufferSize(this.sampleRate,
+                AudioChannelConfig, AudioSampleFormat) / bytesInShort;
     }
 
 
     private class RecordingRunnable implements Runnable {
-        private final int bufferSize;
-        private final AudioInputControllerListener listener;
-        public RecordingRunnable(int bufferSize, AudioInputControllerListener listener) {
-            this.bufferSize = bufferSize;
-            this.listener = listener;
+        private final AudioInputController inputController;
+
+        public RecordingRunnable(AudioInputController inputController) {
+            this.inputController = inputController;
         }
 
         @Override
         public void run() {
-            final ByteBuffer buffer = ByteBuffer.allocateDirect(this.bufferSize);
+            final short[] buffer = new short[inputController.bufferSize];
 
-                while (recordingInProgress.get()) {
-                    int result = recorder.read(buffer, this.bufferSize);
-                    if (result < 0) {
-                        throw new RuntimeException("Reading of audio buffer failed: " +
-                                getBufferReadFailureReason(result));
-                    }
-
-                    if (this.listener != null)
-                        // copy data?
-                        this.listener.onProcessSampleData(buffer);
+            while (recordingInProgress.get()) {
+                int result = recorder.read(buffer, 0, buffer.length);
+                if (result < 0) {
+                    throw new RuntimeException("Reading of audio buffer failed: " +
+                            getBufferReadFailureReason(result));
                 }
-                buffer.clear();
+
+                if (inputController.listener != null)
+                    inputController.listener.onProcessSampleData(buffer);
             }
+        }
 
     }
 

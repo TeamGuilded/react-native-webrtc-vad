@@ -4,6 +4,7 @@
 
 
 extern "C" {
+
 VoiceActivityDetector *vad = nullptr;
 
 void initialize() {
@@ -14,6 +15,7 @@ void stop() {
     delete vad;
     vad = nullptr;
 }
+
 }
 
 extern "C" JNIEXPORT void JNICALL
@@ -34,32 +36,26 @@ Java_com_guilded_gg_RNWebrtcVadModule_stopVad(
 
 }
 
-
-extern "C" JNIEXPORT jstring
-
-JNICALL
-Java_com_guilded_gg_RNWebrtcVadModule_stringFromJNI(
-        JNIEnv *env,
-        jobject /* this */) {
-    std::string hello = "Hello from C++";
-    return env->NewStringUTF(hello.c_str());
-}
-
 extern "C" JNIEXPORT jboolean
 JNICALL
 Java_com_guilded_gg_RNWebrtcVadModule_isVoice(
         JNIEnv *env,
-        jobject /* this */, jshortArray
-        audio_frame,
-        int sampleRate,
-        int frameLength
+        jobject /* this */,
+        jshortArray audioFrame,
+        jint sampleRate,
+        jint frameLength
 ) {
 
     if (vad == nullptr) return jboolean(0);
 
-    return (jboolean) vad->
-            isVoice((int16_t
-    *) &audio_frame, sampleRate, frameLength);
+    jshort* audioFramePtr = env->GetShortArrayElements(audioFrame, NULL);
+
+    jboolean isVoice = (jboolean) vad->
+            isVoice(audioFramePtr, sampleRate, frameLength);
+
+    env->ReleaseShortArrayElements(audioFrame, audioFramePtr, 0);
+
+    return isVoice;
 }
 
 
