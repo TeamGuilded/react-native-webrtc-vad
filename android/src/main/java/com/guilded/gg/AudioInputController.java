@@ -68,7 +68,7 @@ public class AudioInputController {
 
     // Assign the listener implementing events interface that will receive the events
     public void setAudioInputControllerListener(AudioInputControllerListener listener) {
-        listener = listener;
+        this.listener = listener;
     }
 
     public void prepareWithSampleRate(int desiredSampleRate) {
