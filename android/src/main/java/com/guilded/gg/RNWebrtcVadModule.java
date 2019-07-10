@@ -47,7 +47,7 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
 
     @ReactMethod
     public void start(ReadableMap options) {
-        Log.d(this.getName(), "Starting");
+        Log.d(getName(), "Starting");
 
         RNWebrtcVadModule.initializeVad();
         final AudioInputController inputController = AudioInputController.getInstance();
@@ -65,7 +65,7 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
     @ReactMethod
     public void stop() {
         if (BuildConfig.DEBUG) {
-            Log.d(this.getName(), "Stopping");
+            Log.d(getName(), "Stopping");
         }
 
         RNWebrtcVadModule.stopVad();
@@ -73,6 +73,14 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         inputController.stop();
         inputController.setAudioInputControllerListener(null);
         audioData = null;
+    }
+
+    @Override
+    public void onProcessingError(String error){
+        if (BuildConfig.DEBUG) {
+            Log.d(getName(), "Audio sample processing error. Stopping VAD: " + error);
+        }
+        stop();
     }
 
     @Override
@@ -115,13 +123,13 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
                 cumulativeProcessedSampleLengthMs = 0;
 
                 if (BuildConfig.DEBUG) {
-                    Log.d(this.getName(), "Sample buffer filled + analyzed: " + isVoice);
+                    Log.d(getName(), "Sample buffer filled + analyzed: " + isVoice);
                 }
 
                 // Create map for params
                 WritableMap payload = Arguments.createMap();
                 payload.putBoolean("isVoice", isVoice);
-                this.reactContext
+                reactContext
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit("RNWebrtcVad_SpeakingUpdate", payload);
             }
