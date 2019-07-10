@@ -57,6 +57,7 @@ public class AudioInputController {
 
 
     public void stop() {
+        recordingInProgress.set(false);
         if (this.recorder != null) {
             this.recorder.stop();
             this.recorder.release();

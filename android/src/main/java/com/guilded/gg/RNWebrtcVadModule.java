@@ -112,11 +112,9 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
                     Log.d(this.getName(), "Sample buffer filled + analyzed: " + isVoice);
                 }
 
-                // Create map for params
                 WritableMap payload = Arguments.createMap();
-                // Put data to map
                 payload.putBoolean("isVoice", isVoice);
-                // Get EventEmitter from context and send event thanks to it
+
                 this.reactContext
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit("speakingUpdate", payload);
