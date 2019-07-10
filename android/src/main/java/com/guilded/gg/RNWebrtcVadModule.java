@@ -12,13 +12,16 @@ import com.facebook.react.bridge.WritableMap;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.soloader.SoLoader;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.ShortBuffer;
 
 public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements AudioInputController.AudioInputControllerListener {
 
     private final ReactApplicationContext reactContext;
     private double cumulativeProcessedSampleLengthMs = 0;
-    private ShortBuffer audioData;
+    private short[] audioData;
+    private int audioDataOffset;
 
     public RNWebrtcVadModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -35,6 +38,7 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
     private static native void stopVad();
 
     private static native boolean isVoice(short[] audioFrame, int sampleRate, int frameLength);
+
 
     @Override
     public String getName() {
@@ -68,12 +72,11 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         AudioInputController inputController = AudioInputController.getInstance();
         inputController.stop();
         inputController.setAudioInputControllerListener(null);
-        audioData.clear();
         audioData = null;
     }
 
     @Override
-    public void onProcessSampleData(short[] data) {
+    public void onProcessSampleData(ByteBuffer data) {
         final AudioInputController inputController = AudioInputController.getInstance();
         int sampleRate = inputController.sampleRate();
 
@@ -88,20 +91,23 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
 
 
         if (audioData == null) {
-            audioData = ShortBuffer.allocate(chunkSize);
+            audioData = new short[chunkSize];
+        }
+
+        int remainingFrames = audioData.length - audioDataOffset;
+
+        if (remainingFrames > 0) {
+            ShortBuffer audioDataBuffer = data.asShortBuffer();
+            int framesToRead = audioDataBuffer.remaining() < remainingFrames ? audioDataBuffer.remaining() : remainingFrames;
+            audioDataBuffer.get(audioData, audioDataOffset, framesToRead);
+            audioDataOffset += framesToRead;
         }
 
 
-        if (audioData.hasRemaining()) {
-            int length = audioData.remaining() > data.length ? data.length : audioData.remaining();
-            audioData.put(data, 0, length);
+        if (audioDataOffset == audioData.length) {
+            audioDataOffset = 0;
 
-        }
-
-        if (!audioData.hasRemaining()) {
-            boolean isVoice = isVoice(audioData.array(), sampleRate, chunkSize);
-
-            audioData.clear();
+            boolean isVoice = isVoice(audioData, sampleRate, chunkSize / 2);
 
             // Sends updates ~140ms apart back to listeners
             double eventInterval = 0.140;
@@ -112,12 +118,12 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
                     Log.d(this.getName(), "Sample buffer filled + analyzed: " + isVoice);
                 }
 
+                // Create map for params
                 WritableMap payload = Arguments.createMap();
                 payload.putBoolean("isVoice", isVoice);
-
                 this.reactContext
                         .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                        .emit("speakingUpdate", payload);
+                        .emit("RNWebrtcVad_SpeakingUpdate", payload);
             }
         }
 
