@@ -37,9 +37,26 @@
 
 ## Usage
 ```javascript
+
+// SomeJSFile.js
+
 import RNWebrtcVad from 'react-native-webrtc-vad';
 
-// TODO: What to do with the module?
-RNWebrtcVad;
+// TO START:
+// Starts voice activity detection using input audio source on device
+RNWebrtcVad.start();
+RNWebrtcVad.addEventListener('speakingUpdate', _handleSpeakingUpdate);
+
+// other code..
+
+_handleSpeakingUpdate = ({isVoice} = {}) => {
+    this.isSpeaking = !!isVoice;
+};
+
+// TO STOP:
+// Stops voice activity detection
+RNWebrtcVad.stop();
+WebRtcVad.removeEventListener('speakingUpdate', _handleSpeakingUpdate);
+
+
 ```
-  
