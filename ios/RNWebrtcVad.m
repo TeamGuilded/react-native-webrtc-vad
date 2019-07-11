@@ -83,6 +83,10 @@ RCT_EXPORT_METHOD(stop) {
         [self.audioData setLength:0];
 
         // Sends updates ~140ms apart back to listeners
+        // This was chosen from some basic testing/tuning. At 20ms samples, we didn't wanna be
+        // sending events over the react native bridge so often, as it's too frequent/not useful.
+        // If we made it much longer (>=200ms) the delay of the speaking would be quite pronounced to the user.
+        // So 140ms was the nice medium
         const double eventInterval = 0.140;
         if (cumulativeProcessedSampleLengthMs >= eventInterval) {
 
