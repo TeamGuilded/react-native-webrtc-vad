@@ -21,14 +21,11 @@ export default class index {
   }
 
  static addEventListener(type, handler) {
-    if (Platform.OS !== 'ios') return;
     const listener = RNWebrtcVadEmitter.addListener(EventTypeToNativeEventName[type], handler);
     EventHandlerListeners.set(handler, listener);
   }
 
   static removeEventListener(type, handler) {
-    if (Platform.OS !== 'ios') return;
-
     const listener = EventHandlerListeners.get(handler);
     if (!listener) {
         return;
