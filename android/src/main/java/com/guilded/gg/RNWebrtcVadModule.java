@@ -23,6 +23,8 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
     private short[] audioData;
     private int audioDataOffset;
 
+    private static boolean disableInputController = false;
+
     public RNWebrtcVadModule(ReactApplicationContext reactContext) {
         super(reactContext);
         this.reactContext = reactContext;
@@ -52,14 +54,17 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         RNWebrtcVadModule.initializeVad();
         final AudioInputController inputController = AudioInputController.getInstance();
 
-        inputController.setAudioInputControllerListener(this);
-
         // If not specified, will match HW sample, which could be too high.
         // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
         // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
         inputController.prepareWithSampleRate(32000);
-        inputController.start();
 
+        if (!this.disableInputController) {
+            inputController.setAudioInputControllerListener(this);
+            inputController.start();
+        } else {
+            Log.d(getName(), "Internal audio recorder input controller disabled. You must manually call onProcessSampleData");
+        }
     }
 
     @ReactMethod
@@ -73,6 +78,10 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         inputController.stop();
         inputController.setAudioInputControllerListener(null);
         audioData = null;
+    }
+
+    public void setDisableAudioInputController(boolean disableAudioInputController){
+        this.disableInputController = disableAudioInputController;
     }
 
     @Override
