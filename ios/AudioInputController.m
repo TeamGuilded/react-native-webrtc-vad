@@ -14,6 +14,11 @@
     NSString* origAudioMode;
 }
 
+- (instancetype) init {
+    audioDataQueue = dispatch_queue_create(@"com.guilded.gg.vad".UTF8String, NULL);
+    return self;
+}
+
 + (instancetype) sharedInstance {
     static AudioInputController *instance = nil;
     static dispatch_once_t onceToken;
@@ -226,7 +231,8 @@ static OSStatus _recordingCallback(void *inRefCon,
 
     NSData *data = [[NSData alloc] initWithBytes:bufferList->mBuffers[0].mData
                                           length:bufferList->mBuffers[0].mDataByteSize];
-    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    
+    dispatch_async(audioInputController->audioDataQueue, ^{
         [audioInputController.delegate processSampleData:data];
     });
 
