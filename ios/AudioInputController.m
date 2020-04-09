@@ -1,6 +1,3 @@
-
-
-#import <AVFoundation/AVAudioSession.h>
 #import <Foundation/Foundation.h>
 #import <AudioToolbox/AudioToolbox.h>
 #import <AVFoundation/AVFoundation.h>
@@ -15,7 +12,7 @@
 }
 
 - (instancetype) init {
-    audioDataQueue = dispatch_queue_create(@"com.guilded.gg.vad".UTF8String, NULL);
+    _audioDataQueue = dispatch_queue_create(@"com.guilded.gg.vad".UTF8String, NULL);
     return self;
 }
 
@@ -231,8 +228,8 @@ static OSStatus _recordingCallback(void *inRefCon,
 
     NSData *data = [[NSData alloc] initWithBytes:bufferList->mBuffers[0].mData
                                           length:bufferList->mBuffers[0].mDataByteSize];
-    
-    dispatch_async(audioInputController->audioDataQueue, ^{
+
+    dispatch_async(audioInputController->_audioDataQueue, ^{
         [audioInputController.delegate processSampleData:data];
     });
 
