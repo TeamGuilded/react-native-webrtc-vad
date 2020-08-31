@@ -6,9 +6,9 @@
 @end
 
 @interface AudioInputController : NSObject
-@property (nonatomic, weak) id<AudioInputControllerDelegate> delegate;
+@property (nonatomic) id<AudioInputControllerDelegate> delegate;
 @property double audioSampleRate;
-@property (nonatomic, weak) dispatch_queue_t audioDataQueue;
+@property (nonatomic) dispatch_queue_t audioDataQueue;
 
 + (instancetype) sharedInstance;
 
