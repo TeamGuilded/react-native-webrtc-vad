@@ -7,8 +7,8 @@ extern "C" {
 
 VoiceActivityDetector *vad = nullptr;
 
-void initialize() {
-    vad = new VoiceActivityDetector();
+void initialize(jint mode) {
+    vad = new VoiceActivityDetector(mode);
 }
 
 void stop() {
@@ -22,8 +22,9 @@ extern "C" JNIEXPORT void JNICALL
 Java_com_guilded_gg_RNWebrtcVadModule_initializeVad(
         JNIEnv
         *env,
-        jobject /* this */) {
-    initialize();
+        jobject /* this */,
+        jint mode) {
+    initialize(mode);
 
 }
 

@@ -1,19 +1,24 @@
 #include "webrtc/common_audio/vad/include/webrtc_vad.h"
 #import "VoiceActivityDetector.h"
 
+const int DEFAULT_VAD_MODE = 0;
+
 @implementation VoiceActivityDetector {
     VadInst *vad;
 }
 
-- (instancetype)init {
-
+- (instancetype)initWithMode: (int)mode {
     self = [super init];
     if(self) {
         WebRtcVad_Create(&vad);
         WebRtcVad_Init(vad);
-        WebRtcVad_set_mode(vad, 0);
+        WebRtcVad_set_mode(vad, mode);
     }
     return self;
+}
+
+- (instancetype)init {
+    return [self initWithMode:DEFAULT_VAD_MODE];
 }
 
 - (void)dealloc {

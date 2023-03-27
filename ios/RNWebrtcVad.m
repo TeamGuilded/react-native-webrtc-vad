@@ -15,8 +15,8 @@ RCT_EXPORT_MODULE()
 RCT_EXPORT_METHOD(start:(NSDictionary *)options)
 {
     NSLog(@"[WebRTCVad] starting = %@", options);
-    voiceDetector = [[VoiceActivityDetector alloc] init];
-
+    int mode = [options[@"mode"] intValue];
+    voiceDetector = [[VoiceActivityDetector alloc] initWithMode:mode];
     AudioInputController *inputController = [AudioInputController sharedInstance];
 
     // If not specified, will match HW sample, which could be too high.

@@ -1,10 +1,10 @@
 #include "VoiceActivityDetector.h"
 #include "webrtc_vad.h"
 
-VoiceActivityDetector::VoiceActivityDetector(){
+VoiceActivityDetector::VoiceActivityDetector(int mode){
     WebRtcVad_Create(&this->vad);
     WebRtcVad_Init(this->vad);
-    WebRtcVad_set_mode(this->vad, 0);
+    WebRtcVad_set_mode(this->vad, mode);
 }
 
 VoiceActivityDetector::~VoiceActivityDetector(){
