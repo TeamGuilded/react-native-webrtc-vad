@@ -5,7 +5,12 @@ typedef struct WebRtcVadInst VadInst;
 
 #import <Foundation/Foundation.h>
 
+extern const int DEFAULT_VAD_MODE;
+
 @interface VoiceActivityDetector : NSObject
+
+-(instancetype)initWithMode: (int)mode;
+-(instancetype)init;
 
 -(int)isVoice:(const int16_t*)audio_frame sample_rate:(int)fs length:(int) frame_length;
 @end

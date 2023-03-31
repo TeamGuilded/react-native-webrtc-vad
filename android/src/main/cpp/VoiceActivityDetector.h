@@ -16,7 +16,7 @@ private:
 public:
     bool isVoice(const int16_t* audio_frame, int sample_rate, int frame_length);
 
-    VoiceActivityDetector();
+    VoiceActivityDetector(int mode);
 
     ~VoiceActivityDetector();
 
