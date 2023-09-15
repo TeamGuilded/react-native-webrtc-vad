@@ -48,14 +48,29 @@
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
     double sampleRate = audioSession.sampleRate;
 
-    NSLog(@"[WebRTCVad] hardware sample rate = %f, using specified rate = %f", sampleRate, desiredSampleRate);
-
-    if (desiredSampleRate){
-        sampleRate = desiredSampleRate;
+    // The math in this library supports 48khz, 32khz, 16khz, and 8khz. In most
+    // cases, we should expect that the hardware sampling rate is 48khz. In
+    // case it's not, we set audioSampleRate to a fake rate for reference
+    // later. We may not be sampling at the fake rate, but when we run the math
+    // we need to fudge and pass in a compatible rate. Tested with a bluetooth
+    // mic at 44.1khz.
+    if (
+        desiredSampleRate &&
+        sampleRate != 48000 &&
+        sampleRate != 32000 &&
+        sampleRate != 16000 &&
+        sampleRate != 8000
+    ) {
+        self.audioSampleRate = desiredSampleRate;
+    } else {
+        self.audioSampleRate = sampleRate;
     }
 
-    // Store audio sample rate for later use
-    self.audioSampleRate = sampleRate;
+    NSLog(@"[WebRTCVad] hardware sample rate = %f", sampleRate);
+
+    if (self.audioSampleRate != sampleRate) {
+        NSLog(@"[WebRTCVad] hardware sample rate not compatible, so pretending rate is %f for calculations", desiredSampleRate);
+    }
 
     @try {
         [self storeOriginalAudioSetup];
@@ -68,8 +83,11 @@
 
         NSLog(@"[WebRTCVad] set mode %d", ok);
 
-        // 5 second audio buffer hint
-        [audioSession setPreferredIOBufferDuration:5 error:nil];
+        // 0.064 was arrived at via trial and error. Too large of a buffer and
+        // my bluetooth earbuds would start beeping relentlessly. Too small and
+        // speaker output wouldn't work until I switched to bluetooth and back.
+        // 0.064 seconds yields 3072 samples at 48khz. 2822 at 44.1khz.
+        [audioSession setPreferredIOBufferDuration:0.064 error:nil];
 
     } @catch (NSException *e) {
         NSLog(@"[WebRTCVad]: session setup failed: %@", e.reason);
