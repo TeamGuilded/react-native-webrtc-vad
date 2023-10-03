@@ -88,8 +88,8 @@
         // speaker output wouldn't work until I switched to bluetooth and back.
         // 0.063 seconds yields 3024 samples at 48khz. 2778 at 44.1khz.
         // 1 ms higher at 0.064 caused iPhone 14/15 Pro speakers to stop
-        // working properly with choppy audio. 0.02 caused mic input in our app
-        // to stop working (tested on iPhone 12 Pro and iPhone 15 Pro).
+        // working properly with choppy audio. 0.02 caused mic input and speaker
+        // output in our app to stop working (tested on iPhone 12/15 Pro).
         [audioSession setPreferredIOBufferDuration:0.063 error:nil];
 
     } @catch (NSException *e) {
