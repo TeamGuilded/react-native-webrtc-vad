@@ -83,11 +83,14 @@
 
         NSLog(@"[WebRTCVad] set mode %d", ok);
 
-        // 0.064 was arrived at via trial and error. Too large of a buffer and
+        // 0.063 was arrived at via trial and error. Too large of a buffer and
         // my bluetooth earbuds would start beeping relentlessly. Too small and
         // speaker output wouldn't work until I switched to bluetooth and back.
-        // 0.064 seconds yields 3072 samples at 48khz. 2822 at 44.1khz.
-        [audioSession setPreferredIOBufferDuration:0.064 error:nil];
+        // 0.063 seconds yields 3024 samples at 48khz. 2778 at 44.1khz.
+        // 1 ms higher at 0.064 caused iPhone 14/15 Pro speakers to stop
+        // working properly with choppy audio. 0.02 caused mic input in our app
+        // to stop working (tested on iPhone 12 Pro and iPhone 15 Pro).
+        [audioSession setPreferredIOBufferDuration:0.063 error:nil];
 
     } @catch (NSException *e) {
         NSLog(@"[WebRTCVad]: session setup failed: %@", e.reason);
