@@ -83,14 +83,41 @@
 
         NSLog(@"[WebRTCVad] set mode %d", ok);
 
-        // 0.063 was arrived at via trial and error. Too large of a buffer and
-        // my bluetooth earbuds would start beeping relentlessly. Too small and
-        // speaker output wouldn't work until I switched to bluetooth and back.
-        // 0.063 seconds yields 3024 samples at 48khz. 2778 at 44.1khz.
-        // 1 ms higher at 0.064 caused iPhone 14/15 Pro speakers to stop
-        // working properly with choppy audio. 0.02 caused mic input and speaker
-        // output in our app to stop working (tested on iPhone 12/15 Pro).
-        [audioSession setPreferredIOBufferDuration:0.063 error:nil];
+        // After a lot of trial and error, it was discovered that a 48khz
+        // device would be fine with buffer durations that yield ~2049-4094
+        // samples. The iPhone 14/15 Pro does not respect that rule though, and
+        // wants no less and no more than 2049 samples. It must also be known
+        // that the requested buffer duration is just the _preferred_ duration,
+        // but the OS does not give it exactly as the user requests. For
+        // example, requesting 0.032 seconds for a 48khz device actually gives
+        // 0.0427, and that is true up until you request 0.064 seconds.
+        //
+        // 48khz
+        // requested => actual, worked* or not
+        // 0.031 => 0.0213 did not work
+        // 0.032 => 0.0427 worked
+        // 0.063 => 0.0427 worked
+        // 0.064 => 0.0853 worked, except for iPhone 14/15 Pro
+        //
+        // 44.1khz
+        // 0.023 => 0.016 did not work
+        // 0.024 => 0.032 worked
+        // 0.095 => 0.064 worked
+        // 0.096 => 0.128 did not work
+        //
+        // * "worked" means the app transmitted voice when it should and
+        // received voice without distortion. Values outside of the good range
+        // did exhibit one of these two issues.
+        //
+        // It seems the sensible overlap is around the ~2048 sample range.
+        // Since the OS is not giving us exactly 2048, we'll add a few more on
+        // as a buffer, so 2148, which should give us a number that rounds to
+        // the OS's buffer durations. The mappings above may change over time.
+        float bufferDuration = 2148 / sampleRate;
+
+        NSLog(@"[WebRTCVad] requesting a buffer duration of %f", bufferDuration);
+
+        [audioSession setPreferredIOBufferDuration:bufferDuration error:nil];
 
     } @catch (NSException *e) {
         NSLog(@"[WebRTCVad]: session setup failed: %@", e.reason);
