@@ -69,7 +69,7 @@ RCT_EXPORT_METHOD(stop) {
 
     const double sampleLengthMs = 0.02;
 
-    cumulativeProcessedSampleLengthMs += sampleLengthMs;
+    cumulativeProcessedSampleLengthMs += [data length] / sampleRate;
     int chunkSizeBytes = sampleLengthMs /* seconds/chunk */ * sampleRate * 2 /* bytes/sample */ ; /* bytes/chunk */
 
     if ([self.audioData length] >= chunkSizeBytes) {
