@@ -16,13 +16,19 @@ RCT_EXPORT_METHOD(start:(NSDictionary *)options)
 {
     NSLog(@"[WebRTCVad] starting = %@", options);
     int mode = [options[@"mode"] intValue];
+    int preferredBufferSize = -1;
+
+    if ([options[@"preferredBufferSize"] intValue] > 0) {
+        preferredBufferSize = [options[@"preferredBufferSize"] intValue];
+    }
+
     voiceDetector = [[VoiceActivityDetector alloc] initWithMode:mode];
     AudioInputController *inputController = [AudioInputController sharedInstance];
 
     // If not specified, will match HW sample, which could be too high.
     // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
     // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
-    [inputController prepareWithSampleRate:32000];
+    [inputController prepareWithSampleRate:32000 preferredBufferSize:preferredBufferSize];
 
     [inputController start];
 }
@@ -44,7 +50,7 @@ RCT_EXPORT_METHOD(audioDeviceSettings:(RCTPromiseResolveBlock)resolve :(RCTPromi
             @"hwSampleRate" : @(audioSession.sampleRate)
         };
 
-        resolve(details);
+        resolve(settings);
     } @catch (NSException *e) {
         NSLog(@"[WebRTCVad]: reporting audio device settings failed: %@", e.reason);
         reject(@"NSException", @"[WebRTCVad] reporting device settings failed", nil);

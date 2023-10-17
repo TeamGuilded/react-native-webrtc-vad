@@ -51,7 +51,19 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
     @ReactMethod
     public void start(ReadableMap options) {
         Log.d(getName(), "Starting");
-        int mode = options != null && options.hasKey("mode") ? options.getInt("mode") : 0;
+
+        int mode = 0;
+        int preferredBufferSize = -1;
+
+        if (options != null) {
+            if (options.hasKey("mode")) {
+                mode = options.getInt("mode");
+            }
+
+            if (options.hasKey("preferredBufferSize")) {
+                preferredBufferSize = options.getInt("preferredBufferSize");
+            }
+        }
 
         RNWebrtcVadModule.initializeVad(mode);
         final AudioInputController inputController = AudioInputController.getInstance();
@@ -59,7 +71,7 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         // If not specified, will match HW sample, which could be too high.
         // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
         // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
-        inputController.prepareWithSampleRate(32000);
+        inputController.prepareWithSampleRate(32000, preferredBufferSize);
 
         if (!this.disableInputController) {
             inputController.setAudioInputControllerListener(this);
@@ -88,8 +100,8 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
             final AudioInputController inputController = AudioInputController.getInstance();
             WritableMap settings = Arguments.createMap();
 
-            details.putDouble("hwSampleRate", inputController.sampleRate());
-            details.putDouble("bufferSize", inputController.bufferSize());
+            settings.putDouble("hwSampleRate", inputController.sampleRate());
+            settings.putDouble("bufferSize", inputController.bufferSize());
 
             promise.resolve(settings);
         }

@@ -8,13 +8,12 @@
 @interface AudioInputController : NSObject
 @property (nonatomic) id<AudioInputControllerDelegate> delegate;
 @property double audioSampleRate;
-@property double preferredBufferSize;
 @property (nonatomic) dispatch_queue_t audioDataQueue;
 
 + (instancetype) sharedInstance;
 
 - (OSStatus) _initializeAudioGraph;
-- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate;
+- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate preferredBufferSize:(int)preferredBufferSize;
 - (OSStatus) start;
 - (OSStatus) stop;
 @end

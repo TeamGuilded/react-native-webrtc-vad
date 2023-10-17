@@ -42,7 +42,7 @@
     return res;
 }
 
-- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate {
+- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate preferredBufferSize:(int)preferredBufferSize {
     NSLog(@"[WebRTCVad] sampleRate = %f", desiredSampleRate);
 
     AVAudioSession *audioSession = [AVAudioSession sharedInstance];
@@ -113,8 +113,7 @@
         // Since the OS is not giving us exactly 2048, we'll add a few more on
         // as a buffer, so 2148, which should give us a number that rounds to
         // the OS's buffer durations. The mappings above may change over time.
-        float bufferDuration = 2148 / sampleRate;
-        self.preferredBufferSize = 2148;
+        float bufferDuration = (preferredBufferSize > 0 ? preferredBufferSize : 2148) / sampleRate;
 
         NSLog(@"[WebRTCVad] requesting a buffer duration of %f", bufferDuration);
 
