@@ -114,6 +114,7 @@
         // as a buffer, so 2148, which should give us a number that rounds to
         // the OS's buffer durations. The mappings above may change over time.
         float bufferDuration = 2148 / sampleRate;
+        self.preferredBufferSize = 2148;
 
         NSLog(@"[WebRTCVad] requesting a buffer duration of %f", bufferDuration);
 

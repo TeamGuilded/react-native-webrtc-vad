@@ -4,6 +4,7 @@ package com.guilded.gg;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -79,6 +80,23 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         inputController.stop();
         inputController.setAudioInputControllerListener(null);
         audioData = null;
+    }
+
+    @ReactMethod
+    public void audioDeviceSettings(Promise promise) {
+        try {
+            final AudioInputController inputController = AudioInputController.getInstance();
+            WritableMap settings = Arguments.createMap();
+
+            details.putDouble("hwSampleRate", inputController.sampleRate());
+            details.putDouble("bufferSize", inputController.bufferSize());
+
+            promise.resolve(settings);
+        }
+        catch(Exception error) {
+            Log.d(getName(), "reporting audio device settings failed: " + error);
+            promise.reject(error);
+        }
     }
 
     public void setDisableAudioInputController(boolean disableAudioInputController){

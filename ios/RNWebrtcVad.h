@@ -5,6 +5,7 @@
 #import <React/RCTEventEmitter.h>
 #endif
 
+#import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
 #import "AudioInputController.h"
 

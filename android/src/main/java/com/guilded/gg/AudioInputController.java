@@ -44,6 +44,10 @@ public class AudioInputController {
         return this.sampleRate;
     }
 
+    public int bufferSize() {
+        return this.bufferSize;
+    }
+
     public void start() {
         recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, sampleRate,
                 AudioInputController.AudioChannelConfig, AudioInputController.AudioSampleFormat, bufferSize);

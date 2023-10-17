@@ -35,6 +35,22 @@ RCT_EXPORT_METHOD(stop) {
     self.audioData = nil;
 }
 
+RCT_EXPORT_METHOD(audioDeviceSettings:(RCTPromiseResolveBlock)resolve :(RCTPromiseRejectBlock)reject) {
+    @try {
+        AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+
+        NSDictionary *settings = @{
+            @"bufferSize" : @(audioSession.IOBufferDuration * audioSession.sampleRate),
+            @"hwSampleRate" : @(audioSession.sampleRate)
+        };
+
+        resolve(details);
+    } @catch (NSException *e) {
+        NSLog(@"[WebRTCVad]: reporting audio device settings failed: %@", e.reason);
+        reject(@"NSException", @"[WebRTCVad] reporting device settings failed", nil);
+    }
+}
+
 + (BOOL)requiresMainQueueSetup
 {
   return NO;
