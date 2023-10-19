@@ -13,7 +13,7 @@
 + (instancetype) sharedInstance;
 
 - (OSStatus) _initializeAudioGraph;
-- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate;
+- (OSStatus) prepareWithSampleRate:(double)desiredSampleRate preferredBufferSize:(int)preferredBufferSize;
 - (OSStatus) start;
 - (OSStatus) stop;
 @end

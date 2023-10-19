@@ -4,6 +4,7 @@ package com.guilded.gg;
 import android.util.Log;
 
 import com.facebook.react.bridge.Arguments;
+import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -50,7 +51,19 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
     @ReactMethod
     public void start(ReadableMap options) {
         Log.d(getName(), "Starting");
-        int mode = options != null && options.hasKey("mode") ? options.getInt("mode") : 0;
+
+        int mode = 0;
+        int preferredBufferSize = -1;
+
+        if (options != null) {
+            if (options.hasKey("mode")) {
+                mode = options.getInt("mode");
+            }
+
+            if (options.hasKey("preferredBufferSize")) {
+                preferredBufferSize = options.getInt("preferredBufferSize");
+            }
+        }
 
         RNWebrtcVadModule.initializeVad(mode);
         final AudioInputController inputController = AudioInputController.getInstance();
@@ -58,7 +71,7 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         // If not specified, will match HW sample, which could be too high.
         // Ex: Most devices run at 48000,41000 (or 48kHz/44.1hHz). So cap at highest vad supported sample rate supported
         // See: https://github.com/TeamGuilded/react-native-webrtc-vad/blob/master/webrtc/common_audio/vad/include/webrtc_vad.h#L75
-        inputController.prepareWithSampleRate(32000);
+        inputController.prepareWithSampleRate(32000, preferredBufferSize);
 
         if (!this.disableInputController) {
             inputController.setAudioInputControllerListener(this);
@@ -79,6 +92,23 @@ public class RNWebrtcVadModule extends ReactContextBaseJavaModule implements Aud
         inputController.stop();
         inputController.setAudioInputControllerListener(null);
         audioData = null;
+    }
+
+    @ReactMethod
+    public void audioDeviceSettings(Promise promise) {
+        try {
+            final AudioInputController inputController = AudioInputController.getInstance();
+            WritableMap settings = Arguments.createMap();
+
+            settings.putDouble("hwSampleRate", inputController.sampleRate());
+            settings.putDouble("bufferSize", inputController.bufferSize());
+
+            promise.resolve(settings);
+        }
+        catch(Exception error) {
+            Log.d(getName(), "reporting audio device settings failed: " + error);
+            promise.reject(error);
+        }
     }
 
     public void setDisableAudioInputController(boolean disableAudioInputController){

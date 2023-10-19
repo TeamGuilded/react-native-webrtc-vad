@@ -20,6 +20,11 @@ export default class index {
     RNWebrtcVad.stop();
   }
 
+  static async audioDeviceSettings() {
+    const stats = await RNWebrtcVad.audioDeviceSettings();
+    return stats;
+  }
+
  static addEventListener(type, handler) {
     const listener = RNWebrtcVadEmitter.addListener(EventTypeToNativeEventName[type], handler);
     EventHandlerListeners.set(handler, listener);

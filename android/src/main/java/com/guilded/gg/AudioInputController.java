@@ -44,6 +44,10 @@ public class AudioInputController {
         return this.sampleRate;
     }
 
+    public int bufferSize() {
+        return this.bufferSize;
+    }
+
     public void start() {
         recorder = new AudioRecord(MediaRecorder.AudioSource.DEFAULT, sampleRate,
                 AudioInputController.AudioChannelConfig, AudioInputController.AudioSampleFormat, bufferSize);
@@ -71,7 +75,7 @@ public class AudioInputController {
         this.listener = listener;
     }
 
-    public void prepareWithSampleRate(int desiredSampleRate) {
+    public void prepareWithSampleRate(int desiredSampleRate, int preferredBufferSize) {
         int sampleRate = 44100; // default sample rate: supported on most android devices
 
         if (desiredSampleRate > 0) {
@@ -80,9 +84,15 @@ public class AudioInputController {
 
         this.sampleRate = sampleRate;
 
-
-        bufferSize = AudioRecord.getMinBufferSize(sampleRate,
-                AudioChannelConfig, AudioSampleFormat);
+        if (preferredBufferSize > 0) {
+            bufferSize = preferredBufferSize;
+        } else {
+            bufferSize = AudioRecord.getMinBufferSize(
+                sampleRate,
+                AudioChannelConfig,
+                AudioSampleFormat
+            );
+        }
     }
 
 
